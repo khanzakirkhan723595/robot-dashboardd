@@ -1,0 +1,30 @@
+import React from 'react';
+import { Server } from 'lucide-react';
+
+const systemInfoData = [
+    { label: 'Robot ID', value: 'RBT-001' },
+    { label: 'Firmware', value: 'v2.1.4' },
+    { label: 'Location', value: 'Lab Station A' },
+    { label: 'Last Maintenance', value: '15 days ago' }
+];
+
+const SystemInfo = () => {
+    return (
+        <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-gray-700/50">
+          <h3 className="text-xl font-bold text-gray-200 mb-4 flex items-center gap-2">
+            <Server className="w-5 h-5 text-blue-400" />
+            System Information
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            {systemInfoData.map((info, index) => (
+              <div key={index} className="bg-gray-700/30 p-3 rounded-lg">
+                <div className="text-sm text-gray-400 mb-1">{info.label}</div>
+                <div className="font-semibold text-gray-200">{info.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+    );
+};
+
+export default SystemInfo;
