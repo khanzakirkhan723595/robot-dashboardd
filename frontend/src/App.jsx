@@ -22,27 +22,29 @@ import {
 
 // This data would also come from a backend in a real application.
 // For now, it remains static on the frontend.
-const chartData = {
-    temperature: {
-      data: [ { time: '00:00', value: 38 }, { time: '04:00', value: 41 }, { time: '08:00', value: 45 }, { time: '12:00', value: 48 }, { time: '16:00', value: 52 }, { time: '20:00', value: 46 }, { time: '24:00', value: 42 } ],
-      color: '#ef4444',
-      unit: '°C'
-    },
-    battery: {
-      data: [ { time: '00:00', value: 100 }, { time: '04:00', value: 95 }, { time: '08:00', value: 87 }, { time: '12:00', value: 78 }, { time: '16:00', value: 85 }, { time: '20:00', value: 88 }, { time: '24:00', value: 85 } ],
-      color: '#22c55e',
-      unit: '%'
-    },
-    cpu: {
-      data: [ { time: '00:00', value: 25 }, { time: '04:00', value: 30 }, { time: '08:00', value: 45 }, { time: '12:00', value: 60 }, { time: '16:00', value: 40 }, { time: '20:00', value: 35 }, { time: '24:00', value: 34 } ],
-      color: '#3b82f6',
-      unit: '%'
-    }
-  };
+// const chartData = {
+//     temperature: {
+//       data: [ { time: '00:00', value: 38 }, { time: '04:00', value: 41 }, { time: '08:00', value: 45 }, { time: '12:00', value: 48 }, { time: '16:00', value: 52 }, { time: '20:00', value: 46 }, { time: '24:00', value: 42 } ],
+//       color: '#ef4444',
+//       unit: '°C'
+//     },
+//     battery: {
+//       data: [ { time: '00:00', value: 100 }, { time: '04:00', value: 95 }, { time: '08:00', value: 87 }, { time: '12:00', value: 78 }, { time: '16:00', value: 85 }, { time: '20:00', value: 88 }, { time: '24:00', value: 85 } ],
+//       color: '#22c55e',
+//       unit: '%'
+//     },
+//     cpu: {
+//       data: [ { time: '00:00', value: 25 }, { time: '04:00', value: 30 }, { time: '08:00', value: 45 }, { time: '12:00', value: 60 }, { time: '16:00', value: 40 }, { time: '20:00', value: 35 }, { time: '24:00', value: 34 } ],
+//       color: '#3b82f6',
+//       unit: '%'
+//     }
+//   };
 
 const App = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [loading, setLoading] = useState(true);
+  const [systemInfo, setSystemInfo] = useState({});
+  const [dynamicChartData, setDynamicChartData] = useState({});
   // Initial state is empty/zero until data is fetched
   const [robotData, setRobotData] = useState({
     systemStatus: 'offline',
@@ -60,43 +62,99 @@ const App = () => {
   ]);
 
   // This useEffect fetches data from the local mockData.json file
-  useEffect(() => {
-    const dataUrl = '/mockData.json'; // Using the local file from the 'public' folder
+  // useEffect(() => {
+  //   // const dataUrl = '/mockData.json'; // Using the local file from the 'public' folder
+  //   const dataUrl = 'http://localhost:8000/api/robot/health';
 
+  //   const fetchData = async () => {
+  //     try {
+  //       if (loading === false) setLoading(true); // Show loading for subsequent fetches
+  //       const response = await fetch(dataUrl);
+  //       const data = await response.json();
+        
+  //       setRobotData(data); 
+  //       setCurrentTime(new Date());
+        
+  //       // In a real app, you would fetch alerts from another endpoint.
+  //       // Here, we just update the message after the first successful fetch.
+  //       if (alerts[0].message.includes('Awaiting')) {
+  //            setAlerts([
+  //               { id: 1, type: 'info', message: 'System diagnostic completed successfully', time: '1 min ago' },
+  //               { id: 2, type: 'warning', message: 'Memory usage above 65%', time: '2 min ago' }
+  //            ]);
+  //       }
+
+  //     } catch (error) {
+  //       console.error("Failed to fetch robot data:", error);
+  //       setRobotData(prev => ({ ...prev, systemStatus: 'offline' }));
+  //       setAlerts([{ id: 1, type: 'error', message: 'Failed to connect to robot.', time: 'now' }]);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+    
+  //   fetchData(); // Fetch immediately on load
+
+  //   const pollInterval = setInterval(fetchData, 5000); // Re-fetch every 5 seconds
+    
+  //   return () => clearInterval(pollInterval); // Cleanup on component unmount
+    
+  // }, []); // Empty array ensures this effect runs only once on mount
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
-        if (loading === false) setLoading(true); // Show loading for subsequent fetches
-        const response = await fetch(dataUrl);
-        const data = await response.json();
+        setLoading(true); // You can keep the loading state
         
-        setRobotData(data); 
-        setCurrentTime(new Date());
+        // Fetch all data points in parallel
+        const [latestRes, historyRes, alertsRes, infoRes] = await Promise.all([
+          fetch('http://localhost:8000/api/robot/latest'),
+          fetch('http://localhost:8000/api/robot/history'),
+          fetch('http://localhost:8000/api/robot/alerts'),
+          fetch('http://localhost:8000/api/robot/info'),
+        ]);
+
+        // Process data
+        const latestData = await latestRes.json();
+        const historyData = await historyRes.json();
+        const alertsData = await alertsRes.json();
+        const infoData = await infoRes.json();
+
+        // Set all your states
+        setRobotData(latestData); // For MetricCards
+        setSystemInfo(infoData); // For SystemInfo component
+        setAlerts(alertsData);   // For AlertsPanel component
         
-        // In a real app, you would fetch alerts from another endpoint.
-        // Here, we just update the message after the first successful fetch.
-        if (alerts[0].message.includes('Awaiting')) {
-             setAlerts([
-                { id: 1, type: 'info', message: 'System diagnostic completed successfully', time: '1 min ago' },
-                { id: 2, type: 'warning', message: 'Memory usage above 65%', time: '2 min ago' }
-             ]);
-        }
+        // This is the new part: Process history data for your chart
+        // The static chartData in App.jsx can be removed.
+        const formattedChartData = {
+          temperature: {
+            data: historyData.map(d => ({ time: new Date(d.timestamp).toLocaleTimeString(), value: d.temperature })),
+            color: '#ef4444', unit: '°C'
+          },
+          battery: {
+            data: historyData.map(d => ({ time: new Date(d.timestamp).toLocaleTimeString(), value: d.battery })),
+            color: '#22c55e', unit: '%'
+          },
+          cpu: {
+            data: historyData.map(d => ({ time: new Date(d.timestamp).toLocaleTimeString(), value: d.cpuUsage })),
+            color: '#3b82f6', unit: '%'
+          }
+        };
+        setDynamicChartData(formattedChartData); // You'd need a new state for this
 
       } catch (error) {
-        console.error("Failed to fetch robot data:", error);
-        setRobotData(prev => ({ ...prev, systemStatus: 'offline' }));
-        setAlerts([{ id: 1, type: 'error', message: 'Failed to connect to robot.', time: 'now' }]);
+        console.error("Failed to fetch data from backend:", error);
       } finally {
         setLoading(false);
       }
     };
-    
-    fetchData(); // Fetch immediately on load
 
-    const pollInterval = setInterval(fetchData, 5000); // Re-fetch every 5 seconds
-    
-    return () => clearInterval(pollInterval); // Cleanup on component unmount
-    
-  }, []); // Empty array ensures this effect runs only once on mount
+    fetchData(); // Fetch on load
+    const interval = setInterval(fetchData, 5000); // Poll the backend for new data
+    return () => clearInterval(interval);
+
+  }, []);
   
   // Calculates overall health status whenever robotData changes
   const healthStatus = useMemo(() => {
@@ -194,10 +252,10 @@ const App = () => {
           />
         </div>
 
-        <PerformanceChart chartData={chartData} />
+        <PerformanceChart chartData={dynamicChartData} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SystemInfo />
+          <SystemInfo systemInfo={systemInfo} />
           <AlertsPanel alerts={alerts} />
         </div>
       </div>

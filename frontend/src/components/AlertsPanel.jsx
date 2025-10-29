@@ -11,7 +11,7 @@ const AlertsPanel = ({ alerts }) => {
           <div className="space-y-3">
             {alerts.map((alert) => (
               <div
-                key={alert.id}
+                key={alert._id}
                 className={`p-3 rounded-lg border-l-4 ${
                   alert.type === 'warning'
                     ? 'bg-yellow-500/10 border-yellow-500'
