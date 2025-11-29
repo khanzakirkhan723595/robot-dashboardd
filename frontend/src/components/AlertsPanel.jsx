@@ -9,23 +9,25 @@ const AlertsPanel = ({ alerts }) => {
             Recent Alerts
           </h3>
           <div className="space-y-3">
-            {alerts.map((alert) => (
-              <div
-                key={alert._id}
-                className={`p-3 rounded-lg border-l-4 ${
-                  alert.type === 'warning'
-                    ? 'bg-yellow-500/10 border-yellow-500'
-                    : alert.type === 'error'
-                    ? 'bg-red-500/10 border-red-500'
-                    : 'bg-blue-500/10 border-blue-500'
-                }`}
-              >
-                <div className="flex justify-between items-start">
-                  <span className="text-gray-200 text-sm">{alert.message}</span>
-                  <span className="text-xs text-gray-400 ml-2">{alert.time}</span>
+            {alerts.length === 0 ? (
+                <p className="text-gray-500 italic">No recent alerts</p>
+            ) : (
+                alerts.map((alert, index) => (
+                <div
+                    key={index}
+                    className={`p-3 rounded-lg border-l-4 ${
+                    alert.type === 'error'
+                        ? 'bg-red-500/10 border-red-500' // Critical
+                        : 'bg-yellow-500/10 border-yellow-500' // Warning
+                    }`}
+                >
+                    <div className="flex justify-between items-start">
+                        <span className="text-gray-200 text-sm font-medium">{alert.message}</span>
+                        <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">{alert.time}</span>
+                    </div>
                 </div>
-              </div>
-            ))}
+                ))
+            )}
           </div>
         </div>
     );

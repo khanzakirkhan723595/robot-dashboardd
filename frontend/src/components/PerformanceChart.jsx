@@ -4,10 +4,23 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 const PerformanceChart = ({ chartData }) => {
   const [activeChart, setActiveChart] = useState('temperature');
 
+  // Prevent crash: If data hasn't loaded yet, show a placeholder box
+  if (!chartData || !chartData[activeChart] || !chartData[activeChart].data) {
+    return (
+      <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 mb-8 border border-gray-700/50 h-96 flex items-center justify-center">
+        <div className="text-gray-400 text-center">
+          <p className="text-xl font-semibold mb-2">No Data Available</p>
+          <p className="text-sm">Waiting for robot connection...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 mb-8 border border-gray-700/50">
       <h3 className="text-2xl font-bold text-gray-200 mb-6">Performance Metrics</h3>
       
+      {/* Buttons to toggle graph view */}
       <div className="flex gap-2 mb-6">
         {Object.keys(chartData).map((chart) => (
           <button
@@ -24,6 +37,7 @@ const PerformanceChart = ({ chartData }) => {
         ))}
       </div>
       
+      {/* Recharts Component */}
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData[activeChart].data}>
