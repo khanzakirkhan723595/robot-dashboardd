@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const readingSchema = new Schema({
+  robotId: { type: String, required: true, index: true },
   timestamp: { type: Date, default: Date.now },
   battery: Number,
   temperature: Number,
