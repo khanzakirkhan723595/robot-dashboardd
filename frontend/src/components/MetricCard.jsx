@@ -78,24 +78,6 @@ const MetricCard = ({ title, value, unit, progress, icon: Icon, status }) => (
         />
       </div>
     )}
-    
-    {title === 'Battery Level' && (
-      <div className="text-sm text-gray-400 mt-2">
-        Estimated: 3h 22m remaining
-      </div>
-    )}
-    
-    {title === 'Core Temperature' && (
-      <div className="text-sm text-gray-400 mt-2">
-        Normal range: 20-60°C
-      </div>
-    )}
-    
-    {title === 'Memory Usage' && (
-      <div className="text-sm text-gray-400 mt-2">
-        5.4GB / 8GB used
-      </div>
-    )}
   </div>
 );
 
