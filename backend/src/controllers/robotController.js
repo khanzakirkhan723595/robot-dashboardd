@@ -76,7 +76,8 @@ export const getHistoricalData = async (req, res) => {
     const { robotId } = req.params;
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const history = await Reading.find({ robotId, timestamp: { $gte: oneDayAgo } })
-                                  .sort({ timestamp: 1 });
+                                  .sort({ timestamp: 1 })
+                                  .limit(50);
     res.json(history);
   } catch (err) { res.status(500).json({ message: err.message }); }
 };
